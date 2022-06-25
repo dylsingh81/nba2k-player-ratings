@@ -4,8 +4,11 @@ import fs from "fs";
 
 import { BASE_URL } from "./url.js";
 import { CURRENT_TEAMS } from "./teams.js";
+import { OLD_TEAM_NAMES } from "./teams.js";
 import { player } from "./player.js";
 import { teamNamePrettier } from "./util.js";
+
+const historic = true
 
 /**
  * Each team's URL 
@@ -21,6 +24,8 @@ function getTeamsUrl(team) {
 async function getPlayersUrlsFromEachTeam(team) {
     let playerUrls = [];
     let teamUrl = getTeamsUrl(team);
+
+    //console.log(`Start to get player urls from ${teamUrl}`);
 
     let promise = new Promise(function (resolve, reject) {
         request(teamUrl, function(error, response, body) {
@@ -184,7 +189,12 @@ function sortPlayers(a, b) {
  * Sava data to local disk. Every new run generates a new file.
  */
 function saveData(db) {
+
     var filePath = './data/roster.json';
+    if(historic)
+    {
+        filePath = './data/roster_historic.json';
+    }
     var data = JSON.stringify(db, null, 4);
     
     fs.writeFile(filePath, data, function(error) {
@@ -198,6 +208,10 @@ function saveData(db) {
 
 var __main = async function() {
     let teams = CURRENT_TEAMS;
+
+    if(historic) {
+        teams = OLD_TEAM_NAMES;
+    }
 
     // <teams, all player urls>
     var roster = new Map();
